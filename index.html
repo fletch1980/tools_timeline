@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bible Timeline — Bible Study Hub</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0a1a; font-family: system-ui, sans-serif; min-height: 100vh; padding: 20px 16px 60px; color: white; }
+
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; color: #a78bfa; font-size: 13px; text-decoration: none; margin-bottom: 20px; }
+    .back-btn:hover { color: white; }
+
+    .header { text-align: center; margin-bottom: 20px; }
+    .header .icon { font-size: 40px; margin-bottom: 8px; }
+    .header h1 { font-size: 22px; font-weight: 900; }
+    .header p { font-size: 13px; color: #9ca3af; margin-top: 4px; }
+
+    /* Era filter */
+    .era-filter { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 20px; }
+    .era-btn { padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1.5px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #9ca3af; cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
+    .era-btn.active { border-color: #a78bfa; color: #a78bfa; background: rgba(167,139,250,0.12); }
+
+    /* Timeline */
+    .timeline { position: relative; padding-left: 24px; }
+    .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, #4338ca, #7c3aed, #a855f7); border-radius: 2px; }
+
+    .event { position: relative; margin-bottom: 4px; }
+    .event-dot { position: absolute; left: -20px; top: 16px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid; flex-shrink: 0; background: #0a0a1a; }
+    .event-card { border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); overflow: hidden; cursor: pointer; transition: background 0.15s; margin-bottom: 10px; }
+    .event-card:hover { background: rgba(255,255,255,0.07); }
+    .event-header { padding: 12px 14px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .event-left { flex: 1; }
+    .event-date { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .event-title { font-size: 14px; font-weight: 800; color: white; line-height: 1.3; }
+    .event-ref { font-size: 11px; color: #6b7280; margin-top: 3px; }
+    .event-arrow { color: rgba(255,255,255,0.25); font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+    .event-body { padding: 0 14px 14px; border-top: 1px solid rgba(255,255,255,0.06); display: none; }
+    .event-body.open { display: block; }
+    .event-desc { font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.7; margin-top: 10px; }
+    .event-significance { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.25); border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
+    .sig-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #a78bfa; margin-bottom: 4px; }
+    .sig-text { font-size: 12px; color: #e0e7ff; line-height: 1.5; }
+
+    /* Era section header */
+    .era-header { display: flex; align-items: center; gap: 10px; margin: 24px 0 12px; }
+    .era-line { flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
+    .era-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap; }
+
+    .empty-state { text-align: center; color: #4b5563; padding: 40px 0; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<a class="back-btn" href="../index.html">← Bible Study Hub</a>
+<div class="header">
+  <div class="icon">🕐</div>
+  <h1>Bible Timeline</h1>
+  <p>Every major event from creation to Revelation</p>
+</div>
+
+<div class="era-filter" id="eraFilter"></div>
+<div class="timeline" id="timeline"></div>
+
+<script>
+  var EVENTS = [
+    // CREATION & PRIMEVAL
+    { id:1,  era:"Creation & Primeval", date:"~4000 BC (symbolic)",  color:"#10b981", dot:"#10b981", title:"Creation",                    ref:"Genesis 1–2",        desc:"God creates the heavens and the earth in six days. On Day 6 He forms humanity in His own image — male and female — and breathes life into them personally. Day 7 He rests, blessing the Sabbath as sacred.", significance:"The entire Bible assumes this foundation. Humanity's identity, dignity, purpose, and relationship with God all flow from Genesis 1–2. The New Testament opens with John echoing it: 'In the beginning was the Word.'" },
+    { id:2,  era:"Creation & Primeval", date:"~4000 BC",             color:"#ef4444", dot:"#ef4444", title:"The Fall",                     ref:"Genesis 3",          desc:"Satan, in the form of a serpent, deceives Eve. Adam follows. They eat the forbidden fruit and everything changes: shame, blame, broken relationship with God, pain in childbirth, toil in work, and death enter the world. God clothes them with animal skins — the first blood shed to cover human shame.", significance:"Genesis 3 explains everything broken in human experience. But it also contains the first gospel promise: the seed of the woman will crush the serpent's head (3:15) — pointing to Jesus 4,000 years before His birth." },
+    { id:3,  era:"Creation & Primeval", date:"~3900 BC",             color:"#ef4444", dot:"#ef4444", title:"Cain Murders Abel",            ref:"Genesis 4",          desc:"Adam and Eve's firstborn son Cain murders his brother Abel out of jealousy. God confronts Cain and places a mark on him for protection, but Cain is exiled. Yet the chapter ends with hope: 'At that time people began to call on the name of the LORD.'", significance:"The first murder happens one generation after the Fall. Sin, unchecked, escalates. This pattern runs through all of human history — and Scripture." },
+    { id:4,  era:"Creation & Primeval", date:"~2400 BC",             color:"#3b82f6", dot:"#3b82f6", title:"Noah and the Flood",           ref:"Genesis 6–9",        desc:"Human wickedness reaches a breaking point. God grieves and sends a global flood, but rescues Noah — a righteous man — and his family, along with representatives of every creature. After the flood, God makes His first formal covenant with all living creatures, placing a rainbow in the sky as its sign.", significance:"The flood is simultaneously the greatest act of judgment and the greatest act of salvation in the OT. The ark is a picture of Christ — those who are 'in' Him are safe from judgment. The rainbow is God's sworn promise, still visible today." },
+    { id:5,  era:"Creation & Primeval", date:"~2200 BC",             color:"#f97316", dot:"#f97316", title:"Tower of Babel",               ref:"Genesis 11",         desc:"Humanity unites to build a city and tower to 'make a name for themselves' — defying God's command to fill the earth. God confuses their languages and scatters them across the earth. This is the origin of every language, culture, and people group.", significance:"Babel is the origin of the world's nations. Pentecost (Acts 2) is its reversal — the Holy Spirit enables everyone to hear in their own language. What Babel divided, the gospel reunites." },
+
+    // PATRIARCHS
+    { id:6,  era:"Patriarchs",          date:"~2100 BC",             color:"#f59e0b", dot:"#f59e0b", title:"The Call of Abraham",          ref:"Genesis 12",         desc:"God calls Abram — an idol worshipper from Ur — to leave everything and go to a land he has not yet seen. God makes seven promises, including: 'All peoples on earth will be blessed through you.' Abram obeys immediately.", significance:"This is the beginning of God's rescue plan for humanity. The promise 'all peoples blessed through you' is the gospel in seed form — quoted by Paul in Galatians 3:8 as 'the gospel announced in advance.'" },
+    { id:7,  era:"Patriarchs",          date:"~2080 BC",             color:"#f59e0b", dot:"#f59e0b", title:"God's Covenant with Abraham",  ref:"Genesis 15; 17",     desc:"God makes a binding covenant with Abraham through a dramatic ceremony — splitting animals in two, then walking through them alone while Abraham sleeps. Only God walks between the pieces, taking both sides of the covenant on Himself. Later He changes Abram's name to Abraham ('father of many nations').", significance:"God takes both sides of the covenant — meaning its fulfillment depends entirely on His faithfulness, not Abraham's. This is the foundation of grace. Romans 4 and Galatians 3 build their theology of justification by faith on this moment." },
+    { id:8,  era:"Patriarchs",          date:"~2050 BC",             color:"#f59e0b", dot:"#f59e0b", title:"The Binding of Isaac",         ref:"Genesis 22",         desc:"God commands Abraham to sacrifice his promised son Isaac on Mount Moriah. Abraham obeys fully. At the last moment God provides a ram caught in a thicket as a substitute. Abraham names the place 'The LORD Will Provide.'", significance:"The most detailed picture of the gospel in the entire OT. Isaac carrying wood = Jesus carrying His cross. The ram caught in thorns = Jesus wearing a crown of thorns. The mountain = Moriah, where Jerusalem and ultimately the Temple would be built. Romans 8:32 echoes this: 'He did not spare his own Son.'" },
+    { id:9,  era:"Patriarchs",          date:"~1900 BC",             color:"#f59e0b", dot:"#f59e0b", title:"Joseph Sold into Slavery",     ref:"Genesis 37",         desc:"Joseph, Jacob's favored son, is sold by his jealous brothers to slave traders for 20 pieces of silver. He is taken to Egypt, falsely accused by Potiphar's wife, and imprisoned. Through it all, 'the LORD was with Joseph.'", significance:"Joseph is one of the clearest pictures of Jesus in the OT: beloved son, sold for silver by those closest to him, falsely condemned, exalted to rescue the very people who rejected him. His story climaxes in Genesis 50:20: 'You intended to harm me, but God intended it for good.'" },
+    { id:10, era:"Patriarchs",          date:"~1876 BC",             color:"#f59e0b", dot:"#f59e0b", title:"Jacob's Family Moves to Egypt", ref:"Genesis 46–47",      desc:"After Joseph is revealed as second-in-command of Egypt, a devastating famine drives Jacob and his 70 descendants to settle in Goshen. God confirms to Jacob at the border: 'I will go down to Egypt with you, and I will surely bring you back again.'", significance:"70 people enter Egypt. 400 years later, 2 million leave. God's promise of a nation is being set up — through slavery and suffering." },
+
+    // EXODUS & THE LAW
+    { id:11, era:"Exodus & The Law",    date:"~1446 BC",             color:"#ef4444", dot:"#ef4444", title:"The Exodus from Egypt",        ref:"Exodus 1–15",        desc:"After 400 years of slavery, God raises up Moses and sends ten plagues on Egypt. The final plague — death of the firstborn — is passed over for every household covered by the blood of a lamb on the doorposts. Pharaoh releases Israel. They cross the Red Sea on dry ground while the Egyptian army is drowned.", significance:"The Exodus is the defining event of the entire OT — referred to more than any other event. It is Israel's 'gospel': God rescued us. The Passover lamb is explicitly called a picture of Jesus by Paul (1 Corinthians 5:7). The Last Supper was a Passover meal." },
+    { id:12, era:"Exodus & The Law",    date:"~1446 BC",             color:"#ef4444", dot:"#ef4444", title:"The Ten Commandments",         ref:"Exodus 19–20",       desc:"God descends on Mount Sinai in fire, thunder, and cloud. He speaks the Ten Commandments to the whole nation of Israel. Notably, He introduces them with grace before law: 'I am the LORD your God, who brought you out of Egypt.' The law is given to a people already redeemed — not as the means of redemption.", significance:"The Ten Commandments are the moral foundation of Western civilization. Jesus summarized all 10 in two: love God and love your neighbor (Matthew 22:37–40). Paul says the law's purpose was to reveal our need for a Savior (Romans 3:20, Galatians 3:24)." },
+    { id:13, era:"Exodus & The Law",    date:"~1446 BC",             color:"#ef4444", dot:"#ef4444", title:"The Golden Calf",              ref:"Exodus 32",          desc:"Forty days after receiving the law, Israel builds a golden calf and worships it. Moses intercedes for the nation, appealing to God's character and His promises to Abraham. God relents. Moses then receives God's great self-description: 'The LORD, the LORD, the compassionate and gracious God, slow to anger, abounding in love.'", significance:"This is the most-quoted self-description of God in the entire Bible — referenced over 30 times. It reveals that even in judgment, God leads with mercy. The scene also shows the power of intercession: Moses literally changes what God does through prayer." },
+    { id:14, era:"Exodus & The Law",    date:"~1406 BC",             color:"#f97316", dot:"#f97316", title:"40 Years in the Wilderness",   ref:"Numbers 13–14",      desc:"Twelve spies enter Canaan. Ten report giants and impossibility; only Caleb and Joshua trust God. The people rebel. God sentences the faithless generation to 40 years of wilderness wandering — one year for each day the spies explored. The entire generation that left Egypt dies in the desert, except Caleb and Joshua.", significance:"Hebrews 3–4 uses this as a direct warning to Christians about unbelief. The 'rest' Israel failed to enter because of unbelief points to the spiritual rest available to those who trust Jesus. Unbelief is not simply weakness — it is rebellion." },
+
+    // CONQUEST & JUDGES
+    { id:15, era:"Conquest & Judges",   date:"~1406 BC",             color:"#10b981", dot:"#10b981", title:"Crossing the Jordan",         ref:"Joshua 1–6",         desc:"Joshua leads Israel across the Jordan River on dry ground — echoing the Red Sea crossing. Rahab the Canaanite prostitute is spared for sheltering the spies. The walls of Jericho fall after Israel marches around them in silence for six days and shouts on the seventh. God makes clear: the victory is His, not Israel's.", significance:"Joshua is a picture of Jesus — even their names are the same (Yeshua/Joshua means 'God saves'). Where Moses (the Law) could not bring Israel into the Promised Land, Joshua did. Paul makes this connection in Galatians and Hebrews." },
+    { id:16, era:"Conquest & Judges",   date:"~1375–1050 BC",        color:"#6b7280", dot:"#6b7280", title:"The Period of the Judges",     ref:"Judges 1–21",        desc:"After Joshua's death, Israel enters a dark cycle that repeats 7 times: sin → oppression by enemies → crying out to God → God raises a judge/deliverer → peace → sin again. The book ends with one of the saddest lines in the Bible: 'In those days Israel had no king; everyone did as they saw fit.'", significance:"The book of Judges is a theological case study in what happens when a people abandon God. The cycle is not just ancient history — it describes human nature in every generation. The book creates a longing for a king who will lead Israel rightly." },
+    { id:17, era:"Conquest & Judges",   date:"~1100 BC",             color:"#10b981", dot:"#10b981", title:"Ruth and Boaz",               ref:"Ruth 1–4",           desc:"During the dark period of the Judges, a Moabite widow named Ruth follows her mother-in-law Naomi to Israel, declaring: 'Where you go I will go.' A relative named Boaz notices her faithfulness and redeems her by marrying her — an act of kinsman-redeemer love. Ruth, a Gentile outsider, enters the lineage of David and Jesus.", significance:"Boaz is a direct picture of Jesus as our kinsman-redeemer — one who becomes our relative (took on flesh) and pays the redemption price. Ruth being a Gentile welcomed into God's family foreshadows the gospel going to all nations." },
+
+    // THE KINGDOM
+    { id:18, era:"The Kingdom",         date:"~1050 BC",             color:"#6366f1", dot:"#6366f1", title:"Saul Becomes First King",      ref:"1 Samuel 8–10",      desc:"Israel demands a king to be like the other nations. God grants their request as an act of judgment, warning them what a king will cost them. Saul, tall and impressive, is chosen. He begins well but his disobedience costs him the kingdom: 'To obey is better than sacrifice.'", significance:"Israel's request for a king 'like the other nations' is a rejection of God as their king. Yet God works through it — the covenant promise of a king from Judah (Genesis 49:10) must be fulfilled. Saul's failure sets the stage for David." },
+    { id:19, era:"The Kingdom",         date:"~1010 BC",             color:"#6366f1", dot:"#6366f1", title:"David Becomes King",          ref:"1 Samuel 16; 2 Samuel 5", desc:"God sends Samuel to anoint a new king from Jesse's sons. Seven impressive sons pass before him. God rejects each one: 'People look at the outward appearance, but the LORD looks at the heart.' The eighth son — left watching sheep — is David. He defeats Goliath, serves under Saul's jealousy, and eventually becomes king over all Israel.", significance:"God makes an everlasting covenant with David (2 Samuel 7): a descendant of David will reign on an eternal throne. This is the Davidic Covenant — the blueprint for the Messiah. Every time the NT calls Jesus 'Son of David,' it's pointing back to this covenant." },
+    { id:20, era:"The Kingdom",         date:"~970 BC",              color:"#6366f1", dot:"#6366f1", title:"Solomon Builds the Temple",   ref:"1 Kings 5–8",        desc:"David's son Solomon builds the Temple in Jerusalem — the permanent dwelling place of God among His people. At its dedication, the glory of God fills the Temple so powerfully that the priests cannot stand to minister. Solomon's prayer of dedication is one of the greatest prayers in Scripture.", significance:"The Temple is the meeting point between heaven and earth — where God dwells with humanity. Every NT reference to Jesus as 'the temple' (John 2:21), to believers as 'the temple of the Holy Spirit' (1 Corinthians 6:19), and to the New Jerusalem (Revelation 21) builds on this." },
+    { id:21, era:"The Kingdom",         date:"~930 BC",              color:"#ef4444", dot:"#ef4444", title:"The Kingdom Divides",         ref:"1 Kings 11–12",      desc:"Solomon's idolatry tears the kingdom apart after his death. His son Rehoboam's harshness drives ten northern tribes to split off under Jeroboam, forming the Northern Kingdom (Israel). The Southern Kingdom (Judah) retains David's line in Jerusalem. The division is permanent.", significance:"The divided kingdom is the direct consequence of Solomon's unfaithfulness. It sets up 200+ years of parallel history culminating in both kingdoms being conquered and exiled — Assyria takes the North in 722 BC, Babylon takes the South in 586 BC." },
+
+    // PROPHETS & EXILE
+    { id:22, era:"Prophets & Exile",    date:"~760–700 BC",          color:"#8b5cf6", dot:"#8b5cf6", title:"Isaiah's Ministry",           ref:"Isaiah 1–66",        desc:"Isaiah ministers to Judah for 60 years across multiple kings. He delivers both the sharpest warnings of judgment and the most glorious promises of redemption in all the OT. Isaiah 53 — the Suffering Servant — describes the crucifixion 700 years before it happened, in detail so precise it reads like an eyewitness account.", significance:"Isaiah is quoted more in the NT than any other OT book except Psalms. Jesus opened His ministry by reading Isaiah 61:1–2 in the synagogue and saying 'Today this Scripture is fulfilled.' Isaiah 53 is the most important single chapter of OT prophecy." },
+    { id:23, era:"Prophets & Exile",    date:"~722 BC",              color:"#ef4444", dot:"#ef4444", title:"Assyria Conquers Northern Israel", ref:"2 Kings 17",      desc:"The Northern Kingdom of Israel falls to the Assyrian Empire after decades of idolatry and moral collapse. The ten northern tribes are deported and scattered throughout the Assyrian empire — becoming the 'lost ten tribes.' Foreigners are resettled in Israel, producing the mixed people known as Samaritans.", significance:"The fall of the North is God's judgment on covenant unfaithfulness — exactly what Moses warned about in Deuteronomy 28. The 'lost tribes' have fascinated historians and Bible students ever since. Some scholars believe descendants are found in Africa, India, and elsewhere." },
+    { id:24, era:"Prophets & Exile",    date:"~605–586 BC",          color:"#ef4444", dot:"#ef4444", title:"Babylon Conquers Jerusalem",  ref:"2 Kings 24–25",      desc:"Nebuchadnezzar of Babylon conquers Jerusalem in three waves (605, 597, 586 BC). The Temple Solomon built is destroyed. The sacred articles are taken to Babylon. The people are deported. Jerusalem is left in ruins. Jeremiah weeps. The Psalms cry out. The exile has begun.", significance:"The exile is the lowest point in Israel's history — God's own people, in a foreign land, with the Temple destroyed and the Davidic king captive. Yet even here, prophets like Jeremiah and Ezekiel promise: this is not the end. God will bring His people home." },
+    { id:25, era:"Prophets & Exile",    date:"~605–535 BC",          color:"#8b5cf6", dot:"#8b5cf6", title:"Daniel in Babylon",           ref:"Daniel 1–12",        desc:"Daniel and his three friends — Shadrach, Meshach, and Abednego — are taken as captives to Babylon. They refuse to compromise their faith: no defiled food, no idol worship, no stopped prayer. God delivers them through furnace and lions' den. Daniel receives the most detailed prophetic visions in the OT.", significance:"Daniel's prophecies include the four world empires (Babylon, Persia, Greece, Rome), the coming of 'one like a son of man' (Daniel 7 — Jesus quotes this directly), and a timeline pointing to the Messiah's coming. Jesus referenced Daniel more than any other OT prophet." },
+    { id:26, era:"Prophets & Exile",    date:"~538 BC",              color:"#10b981", dot:"#10b981", title:"Return from Exile",           ref:"Ezra 1–2",           desc:"Cyrus the Great of Persia conquers Babylon and issues a decree allowing the Jews to return to their homeland and rebuild the Temple. This fulfills Isaiah's prophecy naming Cyrus by name 150 years before his birth (Isaiah 44:28). About 50,000 Jews return under Zerubbabel.", significance:"Isaiah named Cyrus before he was born. This is one of the most specific fulfilled prophecies in the Bible — so specific that some scholars argued Isaiah must have been written later, until the Dead Sea Scrolls confirmed the book's unity and early date." },
+    { id:27, era:"Prophets & Exile",    date:"~445 BC",              color:"#10b981", dot:"#10b981", title:"Nehemiah Rebuilds the Walls",  ref:"Nehemiah 1–13",      desc:"Nehemiah, cupbearer to the Persian king, hears Jerusalem's walls are broken and weeps. He prays, plans, and leads the rebuilding in 52 days — despite intense opposition through mockery, threats, and smear campaigns. His response to opposition: 'I am doing a great work and I cannot come down.'", significance:"Nehemiah is a model of prayer + preparation + perseverance in the face of opposition. The wall is finished in 52 days — enemies recognize the work was done with God's help (6:16). The book ends with covenant renewal and the community recommitting to God's law." },
+    { id:28, era:"Prophets & Exile",    date:"~430 BC",              color:"#8b5cf6", dot:"#8b5cf6", title:"Malachi — Last OT Prophet",   ref:"Malachi 1–4",        desc:"Malachi is the last prophet before 400 years of prophetic silence. He confronts half-hearted worship and broken covenant faithfulness. He promises God will send a messenger to prepare His way — John the Baptist — and that Elijah will come before the great day of the LORD. The OT ends leaning toward the Messiah.", significance:"After Malachi, God goes silent for 400 years. No prophets. No Scripture. Just waiting. Then an angel appears to a priest named Zechariah. The silence is broken. The Word becomes flesh. Everything Malachi pointed to is about to arrive." },
+
+    // 400 YEARS OF SILENCE
+    { id:29, era:"400 Years of Silence", date:"430–5 BC",            color:"#374151", dot:"#6b7280", title:"The Silent Years",            ref:"Between Malachi & Matthew", desc:"Four centuries pass with no prophetic voice. During this time: Alexander the Great conquers the known world and spreads Greek language (making it the lingua franca for the NT). The Maccabean revolt establishes Jewish independence briefly. Rome rises. The Pharisees and Sadducees emerge as religious parties. The world is being prepared.", significance:"The 400 silent years are not wasted — God is setting the stage. Greek as a universal language allows the NT to be written in a tongue everyone reads. Roman roads allow the gospel to spread rapidly. Political stability under Rome creates the conditions for Jesus' birth and the church's expansion." },
+
+    // LIFE OF JESUS
+    { id:30, era:"Life of Jesus",       date:"~5 BC",                color:"#f59e0b", dot:"#f59e0b", title:"The Birth of Jesus",          ref:"Luke 2; Matthew 1–2", desc:"After 400 years of silence, God speaks — not from a throne, but from a manger. Jesus is born to the virgin Mary in Bethlehem, fulfilling Micah 5:2. Angels announce His birth to shepherds. Magi from the East follow a star and worship Him. Herod, threatened, orders all infant boys in Bethlehem killed.", significance:"The incarnation is the central event of all history. The eternal Son of God takes on human flesh — fully God, fully man. John 1:14: 'The Word became flesh and dwelt among us.' Everything in the OT pointed forward to this moment. Everything in the NT flows from it." },
+    { id:31, era:"Life of Jesus",       date:"~AD 27",               color:"#f59e0b", dot:"#f59e0b", title:"Jesus' Baptism & Temptation", ref:"Matthew 3–4",        desc:"John the Baptist prepares the way. Jesus is baptized in the Jordan — the heavens open, the Spirit descends like a dove, and the Father speaks: 'This is my Son, whom I love; with him I am well pleased.' Jesus is then led by the Spirit into the wilderness for 40 days, where He is tempted by Satan and overcomes each time by quoting Scripture.", significance:"Jesus' baptism is the formal inauguration of His public ministry. His 40 days in the wilderness parallel Israel's 40 years — where Israel failed, Jesus succeeds. His threefold defeat of Satan using Deuteronomy shows the power of God's Word against temptation." },
+    { id:32, era:"Life of Jesus",       date:"~AD 27–30",            color:"#f59e0b", dot:"#f59e0b", title:"Jesus' Ministry",             ref:"Matthew–John",       desc:"Three years of teaching, healing, casting out demons, and revealing the Kingdom of God. The Sermon on the Mount. Feeding 5,000. Walking on water. Raising Lazarus. Transfiguration. 'I AM' sayings. Calling twelve disciples. Parables of the Kingdom. Jesus systematically reveals Himself as the fulfillment of every OT promise.", significance:"Jesus' ministry is the hinge of all history. Every miracle is a sign. Every parable is a window into the Kingdom. Every conflict with the Pharisees exposes the difference between religion and relationship. The disciples slowly grasp who He is — and what it will cost." },
+    { id:33, era:"Life of Jesus",       date:"~AD 30",               color:"#dc2626", dot:"#dc2626", title:"The Crucifixion",             ref:"Matthew 26–27; John 18–19", desc:"Jesus is betrayed by Judas for 30 pieces of silver, arrested in Gethsemane, tried in six illegal trials, flogged, mocked, and crucified at Golgotha between two criminals. Darkness covers the land. The Temple curtain tears in two. Jesus cries 'It is finished' and dies. A soldier pierces His side — blood and water flow. John was there and testifies.", significance:"The crucifixion is the moment the entire Bible has been moving toward. Jesus absorbs the wrath of God against sin so that those who trust Him never have to. 'It is finished' (tetelestai) was written on paid receipts in the ancient world — meaning the debt is fully paid. Romans 3:21–26, Isaiah 53, and Hebrews 9–10 unpack its meaning." },
+    { id:34, era:"Life of Jesus",       date:"~AD 30",               color:"#10b981", dot:"#10b981", title:"The Resurrection",            ref:"Matthew 28; John 20", desc:"Three days after His death, the tomb is empty. Mary Magdalene is the first to see the risen Jesus — He calls her by name. He appears to Peter, the disciples, 500 people at once (1 Corinthians 15:6), and finally to Paul on the road to Damascus. He gives the Great Commission: go and make disciples of all nations.", significance:"The resurrection is the foundation of Christianity. Paul says: 'If Christ has not been raised, your faith is futile' (1 Corinthians 15:17). The resurrection is not a symbol — it is a historical event with eyewitnesses. It validates everything Jesus claimed and transforms a group of frightened disciples into people willing to die for what they saw." },
+
+    // EARLY CHURCH
+    { id:35, era:"Early Church",        date:"~AD 30",               color:"#6366f1", dot:"#6366f1", title:"Pentecost — The Church Born",  ref:"Acts 2",             desc:"Fifty days after the resurrection, the Holy Spirit falls on the disciples like a rushing wind and tongues of fire in Jerusalem. Every person hears in their own language — a reversal of Babel. Peter preaches the first Christian sermon. 3,000 people are baptized. The church is born.", significance:"Pentecost is the fulfillment of Joel 2:28–29 and Jesus' promise in John 14–16. The Spirit who filled Jesus now fills His followers. The church is not a human organization — it was born in a moment of divine power and has been sustained by the same Spirit ever since." },
+    { id:36, era:"Early Church",        date:"~AD 35",               color:"#6366f1", dot:"#6366f1", title:"Paul's Conversion",           ref:"Acts 9",             desc:"Saul of Tarsus — the most aggressive persecutor of the early church — is struck blind by the risen Jesus on the road to Damascus. 'Saul, Saul, why do you persecute me?' He is transformed into Paul, the most influential missionary in Christian history, writing 13 of the 27 NT books.", significance:"Paul's conversion is one of the strongest arguments for the resurrection — the most committed enemy of Christianity became its greatest apostle because of a direct encounter with the risen Jesus. He could not have been deceived; he had too much to lose." },
+    { id:37, era:"Early Church",        date:"~AD 47–57",            color:"#6366f1", dot:"#6366f1", title:"Paul's Missionary Journeys",  ref:"Acts 13–21",         desc:"Paul makes three major missionary journeys across Asia Minor, Greece, and eventually toward Rome. He plants churches in Philippi, Thessalonica, Corinth, Ephesus, and many other cities. He writes letters to these churches — Romans, Corinthians, Galatians, Ephesians, Philippians, Colossians, Thessalonians — that become the theological backbone of the NT.", significance:"In 10 years, Paul takes the gospel from Jerusalem to the heart of the Roman Empire. His letters address every theological and practical challenge the early church faced — and still faces today. Romans alone changed the course of Western history through Augustine, Luther, Wesley, and countless others." },
+    { id:38, era:"Early Church",        date:"AD 70",                color:"#ef4444", dot:"#ef4444", title:"Destruction of the Temple",   ref:"Matthew 24; Luke 21", desc:"Roman general Titus destroys Jerusalem and the Temple, fulfilling Jesus' prophecy in Matthew 24:2: 'Not one stone here will be left on another.' Over 1 million Jews are killed. The Jewish sacrificial system ends permanently. The Romans scatter the Jewish people across the empire.", significance:"Jesus predicted this in detail 40 years before it happened. The destruction of the Temple ends the need for animal sacrifice — because the perfect sacrifice has already been made. It permanently shifts Jewish practice: no Temple, no priests, no sacrifices. The focus shifts to synagogue and Torah." },
+    { id:39, era:"Early Church",        date:"~AD 95",               color:"#8b5cf6", dot:"#8b5cf6", title:"Revelation Written",          ref:"Revelation 1–22",    desc:"The apostle John, exiled on the island of Patmos, receives visions from Jesus Christ and writes them down for seven churches in Asia Minor. The visions cover the cosmic war between good and evil, judgment on the wicked, the return of Christ, and the new creation — a new heaven and earth where God dwells with His people forever.", significance:"Revelation is not primarily a newspaper about the future — it is a letter of encouragement to persecuted Christians. Its message: Christ is Lord, not Caesar. The Lamb wins. Every tear will be wiped away. The story ends not with destruction but with creation renewed — God and humanity together, forever, in a garden-city." },
+  ];
+
+  var ERAS = ["All", "Creation & Primeval", "Patriarchs", "Exodus & The Law", "Conquest & Judges", "The Kingdom", "Prophets & Exile", "400 Years of Silence", "Life of Jesus", "Early Church"];
+  var activeEra = "All";
+
+  function renderFilter() {
+    document.getElementById('eraFilter').innerHTML = ERAS.map(function(e) {
+      return '<button class="era-btn' + (e === activeEra ? ' active' : '') + '" onclick="setEra(\'' + e.replace(/'/g,"\\'") + '\')">' + e + '</button>';
+    }).join('');
+  }
+
+  function setEra(era) {
+    activeEra = era;
+    renderFilter();
+    renderTimeline();
+  }
+
+  function renderTimeline() {
+    var filtered = activeEra === 'All' ? EVENTS : EVENTS.filter(function(e) { return e.era === activeEra; });
+    var html = '';
+    var lastEra = '';
+
+    filtered.forEach(function(ev) {
+      if (activeEra === 'All' && ev.era !== lastEra) {
+        html += '<div class="era-header"><div class="era-line"></div><div class="era-title" style="color:' + ev.color + '">' + ev.era + '</div><div class="era-line"></div></div>';
+        lastEra = ev.era;
+      }
+      html += '<div class="event">'
+        + '<div class="event-dot" style="border-color:' + ev.dot + ';box-shadow:0 0 6px ' + ev.dot + '44"></div>'
+        + '<div class="event-card" onclick="toggleEvent(' + ev.id + ')">'
+        + '<div class="event-header">'
+        + '<div class="event-left">'
+        + '<div class="event-date" style="color:' + ev.color + '">' + ev.date + '</div>'
+        + '<div class="event-title">' + ev.title + '</div>'
+        + '<div class="event-ref">' + ev.ref + '</div>'
+        + '</div>'
+        + '<div class="event-arrow" id="arr-' + ev.id + '">\u25bc</div>'
+        + '</div>'
+        + '<div class="event-body" id="body-' + ev.id + '">'
+        + '<div class="event-desc">' + ev.desc + '</div>'
+        + '<div class="event-significance"><div class="sig-label">\u2728 Why It Matters</div><div class="sig-text">' + ev.significance + '</div></div>'
+        + '</div>'
+        + '</div>'
+        + '</div>';
+    });
+
+    if (!filtered.length) html = '<div class="empty-state">No events found.</div>';
+    document.getElementById('timeline').innerHTML = html;
+  }
+
+  function toggleEvent(id) {
+    var body = document.getElementById('body-' + id);
+    var arr = document.getElementById('arr-' + id);
+    var open = body.classList.toggle('open');
+    arr.textContent = open ? '\u25b2' : '\u25bc';
+  }
+
+  renderFilter();
+  renderTimeline();
+</script>
+</body>
+</html>
